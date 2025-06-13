@@ -1,5 +1,5 @@
 import numpy as np
-import copy
+import itertools
 
 class Face:
     def __init__(self, color):
@@ -114,15 +114,17 @@ class Cube:
         raise Exception('No edge found')
 
     def find_corner(self, colors):
+        for perm in itertools.permutations(colors):
+            color1, color2, color3 = perm
         for primary in self.faces:
             print(primary.color)
-            for face1, face2 in primary.is_corner_on_face(colors[0]):
+            for face1, face2 in primary.is_corner_on_face(color1):
                 print(face1.color, face2.color)
-                for tup1 in face1.is_corner_on_face(colors[1]):
-                    if (face2 in tup1) and (primary in tup1):
-                        for tup2 in face2.is_corner_on_face(colors[2]):
-                            if face1 in tup2 and primary in tup2:
-                                return primary, face1, face2
+                for tup1 in face1.is_corner_on_face(color2):
+                    if {face2, primary} == set(tup1):
+                        for tup2 in face2.is_corner_on_face(color3):
+                            if {face1, primary} == set(tup2):
+                                return primary, face1, face2  # returns in "random" order cause of permutations
         raise Exception('No corner found')
 
     def __repr__(self):
@@ -142,4 +144,4 @@ if __name__ == '__main__':
     cube.rotate(cube.green, 1)
     cube.rotate(cube.white, -1)
     print(cube)
-    print(cube.find_corner(['W', 'O', 'B']))
+    print(cube.find_corner(['Y', 'O', 'B']) == (cube.blue, cube.red, cube.yellow))
