@@ -39,7 +39,7 @@ class Face:
     def adjacent(self):
         return [self.left, self.up, self.right, self.down]
 
-    def side(self, other):
+    def side(self, other):  # returns the edges on other's side
         if other == self.left:
             return np.flip(self.array[:, 0].copy())
         elif other == self.right:
