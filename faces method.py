@@ -11,6 +11,30 @@ class Face:
         self.down = 0
         self.across = 0
 
+    def is_edge_on_face(self, color):
+        my_array = []
+        if self.array[1, 0] == color:
+            my_array.append(self.left)
+        if self.array[0, 1] == color:
+            my_array.append(self.up)
+        if self.array[1, 2] == color:
+            my_array.append(self.right)
+        if self.array[2, 1] == color:
+            my_array.append(self.down)
+        return my_array
+
+    def is_corner_on_face(self, color):
+        my_array = []
+        if self.array[0, 0] == color:
+            my_array.append((self.left, self.up))
+        if self.array[0, 2] == color:
+            my_array.append((self.up, self.right))
+        if self.array[2, 2] == color:
+            my_array.append((self.right, self.down))
+        if self.array[2, 0] == color:
+            my_array.append((self.down, self.left))
+        return my_array
+
     def is_solved(self):
         return self.array == np.full((3,3), self.color)
 
@@ -82,6 +106,25 @@ class Cube:
         for i, s in enumerate(adj_array):
             s.swap(reordered[i], face)
 
+    def find_edge(self, colors):
+        for primary in self.faces:
+            for secondary in primary.is_edge_on_face(colors[0]):
+                if primary in secondary.is_edge_on_face(colors[1]):
+                    return primary, secondary
+        raise Exception('No edge found')
+
+    def find_corner(self, colors):
+        for primary in self.faces:
+            print(primary.color)
+            for face1, face2 in primary.is_corner_on_face(colors[0]):
+                print(face1.color, face2.color)
+                for tup1 in face1.is_corner_on_face(colors[1]):
+                    if (face2 in tup1) and (primary in tup1):
+                        for tup2 in face2.is_corner_on_face(colors[2]):
+                            if face1 in tup2 and primary in tup2:
+                                return primary, face1, face2
+        raise Exception('No corner found')
+
     def __repr__(self):
         string = ''
         for face in self.faces:
@@ -99,3 +142,4 @@ if __name__ == '__main__':
     cube.rotate(cube.green, 1)
     cube.rotate(cube.white, -1)
     print(cube)
+    print(cube.find_corner(['W', 'O', 'B']))
