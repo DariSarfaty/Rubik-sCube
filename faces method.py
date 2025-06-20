@@ -11,7 +11,7 @@ class Face:
         self.down = 0
         self.across = 0
 
-    def is_edge_on_face(self, color):
+    def all_edges_on_face(self, color):
         my_array = []
         if self.array[1, 0] == color:
             my_array.append(self.left)
@@ -23,7 +23,7 @@ class Face:
             my_array.append(self.down)
         return my_array
 
-    def is_corner_on_face(self, color):
+    def all_corners_on_face(self, color):
         my_array = []
         if self.array[0, 0] == color:
             my_array.append((self.left, self.up))
@@ -34,6 +34,19 @@ class Face:
         if self.array[2, 0] == color:
             my_array.append((self.down, self.left))
         return my_array
+
+    def corner_color(self, others):
+        others = set(others)
+        if {self.left, self.up} == others:
+            return self.array[0,0]
+        elif {self.up, self.right} == others:
+            return self.array[0,2]
+        elif {self.right, self.down} == others:
+            return self.array[2,2]
+        elif {self.left, self.down} == others:
+            return self.array[2,0]
+        else:
+            raise NotImplementedError
 
     def is_solved(self):
         return self.array == np.full((3,3), self.color)
@@ -108,8 +121,8 @@ class Cube:
 
     def find_edge(self, colors):
         for primary in self.faces:
-            for secondary in primary.is_edge_on_face(colors[0]):
-                if primary in secondary.is_edge_on_face(colors[1]):
+            for secondary in primary.all_edges_on_face(colors[0]):
+                if primary in secondary.all_edges_on_face(colors[1]):
                     return primary, secondary
         raise Exception('No edge found')
 
@@ -126,6 +139,21 @@ class Cube:
                             if {face1, primary} == set(tup2):
                                 return primary, face1, face2  # returns in "random" order cause of permutations
         raise Exception('No corner found')
+
+    def find_corner_8(self, colors):
+        pos = []
+        my_set = set(colors)
+        faces1 = self.white.adjacent()
+        faces2 = [faces1[3], faces1[0], faces1[1], faces1[2]]
+        whites = [self.white for _ in range(4)]
+        yellows = [self.yellow for _ in range(4)]
+        for white, primary, secondary in zip(whites, faces1, faces2):
+            if {white.corner_color([primary,secondary]), primary.corner_color([white, secondary]), secondary.corner_color([white, primary])} == my_set:
+                pos = [white, primary, secondary]
+        for yellow, primary, secondary in zip(yellows, faces1, faces2):
+            if {yellow.corner_color([primary, secondary]), primary.corner_color([yellow, secondary]),secondary.corner_color([yellow, primary])} == my_set:
+                pos = [yellow, primary, secondary]
+        return pos
 
     def __repr__(self):
         string = ''
@@ -144,4 +172,6 @@ if __name__ == '__main__':
     cube.rotate(cube.green, 1)
     cube.rotate(cube.white, -1)
     print(cube)
-    print(cube.find_corner(['Y', 'O', 'B']) == (cube.blue, cube.red, cube.yellow))
+    a = cube.find_corner_8(['Y', 'G', 'O'])
+    print("found corner on following edges:")
+    print(a[0],a[1],a[2])
