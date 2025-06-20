@@ -153,7 +153,11 @@ class Cube:
         for yellow, primary, secondary in zip(yellows, faces1, faces2):
             if {yellow.corner_color([primary, secondary]), primary.corner_color([yellow, secondary]),secondary.corner_color([yellow, primary])} == my_set:
                 pos = [yellow, primary, secondary]
-        return pos
+        first, second, third = pos
+        my_array = [first.corner_color([second, third]), second.corner_color([first, third]), third.corner_color([first, second])]
+        color_to_face = dict(zip(my_array, pos))  # map color from corner_color to the originating face
+        reordered = [color_to_face[c] for c in colors]
+        return reordered
 
     def __repr__(self):
         string = ''
@@ -172,6 +176,8 @@ if __name__ == '__main__':
     cube.rotate(cube.green, 1)
     cube.rotate(cube.white, -1)
     print(cube)
-    a = cube.find_corner_8(['Y', 'G', 'O'])
-    print("found corner on following edges:")
-    print(a[0],a[1],a[2])
+    co = ['W', 'B', 'O']
+    print("finding the following corner:", co)
+    a = cube.find_corner_8(co)
+    print("found corner on following edges:", a[0].color,a[1].color,a[2].color)
+
