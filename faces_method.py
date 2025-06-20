@@ -165,7 +165,7 @@ class Cube:
             string += str(face)
         return string
 
-if __name__ == '__main__':
+if True:
     cube = Cube()
     cube.rotate(cube.blue, -1)
     cube.rotate(cube.white, 1)
